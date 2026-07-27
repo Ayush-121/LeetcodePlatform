@@ -43,41 +43,66 @@ const register = async (req,res)=>{
 }
 
 
-const login = async (req,res)=>{
+const login = async (req, res) => {
+    try {
+        const { emailId, password } = req.body;
 
-    try{
-        const {emailId, password} = req.body;
-
-        if(!emailId)
-            throw new Error("Invalid Credentials");
-        if(!password)
-            throw new Error("Invalid Credentials");
-
-        const user = await User.findOne({emailId});
-
-        const match = await bcrypt.compare(password,user.password);
-
-        if(!match)
-            throw new Error("Invalid Credentials");
-
-        const reply = {
-            firstName: user.firstName,
-            emailId: user.emailId,
-            _id: user._id,
-            role:user.role,
+        if (!emailId || !password) {
+            return res.status(400).json({
+                message: "Email and Password are required"
+            });
         }
 
-        const token =  jwt.sign({_id:user._id , emailId:emailId, role:user.role},process.env.JWT_KEY,{expiresIn: 60*60});
-        res.cookie('token',token,{maxAge: 60*60*1000});
-        res.status(201).json({
-            user:reply,
-            message:"Loggin Successfully"
-        })
+        const user = await User.findOne({ emailId });
+
+        if (!user) {
+            return res.status(401).json({
+                message: "User not found"
+            });
+        }
+
+        const match = await bcrypt.compare(password, user.password);
+
+        if (!match) {
+            return res.status(401).json({
+                message: "Invalid password"
+            });
+        }
+
+        const token = jwt.sign(
+            {
+                _id: user._id,
+                emailId: user.emailId,
+                role: user.role
+            },
+            process.env.JWT_KEY,
+            { expiresIn: "1h" }
+        );
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            maxAge: 60 * 60 * 1000
+        });
+
+        res.status(200).json({
+            user: {
+                firstName: user.firstName,
+                emailId: user.emailId,
+                _id: user._id,
+                role: user.role
+            },
+            message: "Login Successful"
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: err.message
+        });
     }
-    catch(err){
-        res.status(401).send("Error: "+err);
-    }
-}
+};
 
 
 // logOut feature
