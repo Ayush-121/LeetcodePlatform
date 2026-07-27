@@ -2,6 +2,10 @@
 
 A full-stack coding platform inspired by LeetCode where users can practice Data Structures & Algorithms problems, run and submit code, get AI-powered help, and watch video editorials.
 
+Frontend:"http://leetcode-platform.vercel.app/"
+
+Backend API:"https://leetcodeplatform.onrender.com"
+
 ---
 
 ## ✨ Features
