@@ -12,7 +12,9 @@ const videoRouter = require("./routes/videoCreator");
 const cors = require('cors')
 
 // console.log("Hello")
-
+app.get("/", (req, res) => {
+    res.send("Backend is running successfully 🚀");
+});
 app.use(cors({
   origin: [
     "http://localhost:5173",
